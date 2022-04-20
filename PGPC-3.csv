@@ -1,0 +1,10 @@
+Participant,Birth month,Birth year,Sex,Ethnicity,Blood type,Blood pressure,(WmemigHhgt) (kg),Height (cm),Body type
+PGPC-3,,1959,M,White,0+,,81,170,Muscular
+Participant,Immunization
+PGPC-3,MMR
+Participant,Medication
+PGPC-3,Atacand
+Participant,Test Result,
+PGPC-3,High blood pressure,
+Participant,Medical Procedure,
+PGPC-3,Tonsillectomy,
