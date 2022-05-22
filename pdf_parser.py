@@ -18,6 +18,7 @@ def write_csv(file, data):
                 if d == "Blood type":  # is only present in blood type
                     ff.write(f"{data_l[0]}\n{data[index + 1][0]}\n")
                 if d == "Conditions or Symptom":
+                    print(data_l)
                     ff.write(f"{data_l[0]}\n")
                     for i in range(len(data)):
                         if data[index + i + 1][0].\
@@ -54,6 +55,7 @@ def read_pdf(file):
                         
 def main():
     files = ["PGPC-3.pdf", "PGPC-25.pdf", "PGPC-26.pdf"]
+    # files = ["data_integratie/PGPC-3.pdf", "data_integratie/PGPC-25.pdf", "PGPC-26.pdf"]
     for file in files:
         read_pdf(file)
 
