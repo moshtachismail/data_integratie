@@ -30,7 +30,6 @@ def csvreader(file_iter):
                 values.extend(vallist)
 
         column_value_pair = dict(zip(columns, values))
-        print(column_value_pair)
     return column_value_pair
 
 def get_data(column_value_pair):
@@ -39,29 +38,49 @@ def get_data(column_value_pair):
     to generate a string according to OMOP (?) format to insert 
     into a database.
     PARAM: Dict column_value_pair column name - column value
-    RETURN: String according to OMOP (?) format to insert into a database.
+    RETURN: String according to OMOP format to insert into a database.
     """
-
-    # Participant, Birth year, birth month, MAKEN OP BASIS VAN SEX (8507M, 8532F), 
-    # Sex, 4147507, 45532670, Ethnicity
-    values = ["Conditions or Symptom"]
+    values = ["Participant", "Birth year", "Birth month"]
     returnstring = ""
 
     # For loop to get the first 3 standard values, rest is special
     for i in values:            
-        if column_value_pair.get(i) != None:
-            print(column_value_pair.get(i))
-    # return returnstring
+        if column_value_pair.get(i) != None and column_value_pair.get(i) != "":
+            if column_value_pair.get(i).startswith("PGPC"):
+                returnstring += column_value_pair.get(i).split("-")[1] + "," + column_value_pair.get(i) + ","
+            else:
+                returnstring += column_value_pair.get(i) + ","
+        else:
+            returnstring += "NULL,"
 
-def main():
-    # files = ["PGPC-3.csv", "PGPC-25.csv", "PGPC-26.csv"]
-    files = ["PGPC-26.csv"]
+    if column_value_pair.get("Sex") != None:
+        if "m" in column_value_pair.get("Sex").lower():
+            gender_concept_id = "8507," + column_value_pair.get("Sex") + ","
+        else: 
+            gender_concept_id = "8532" + column_value_pair.get("Sex") + ","
+        returnstring += gender_concept_id
+    else:
+        returnstring += ","+"NULL"+","
+
+    if column_value_pair.get("Ethnicity") != None and column_value_pair.get("Ethnicity") != "":
+        if column_value_pair.get("Ethnicity") == "White":
+            returnstring += 2*("45532670," + column_value_pair.get("Ethnicity") + ",")
+            returnstring = returnstring[:-1]
+        else:
+            returnstring += 2*("404," + column_value_pair.get("Ethnicity") + ",")
+            returnstring = returnstring[:-1]
+
+    returnstring = "(" + returnstring + ")"
+    return returnstring
+
+def person_all(files):
+    """
+    Function to create DB insert strings. Calls csvreader and get_data functions.
+    PARAM: List of PGPC CSV file locations.
+    RETURN: List of DB insert strings.
+    """
+    db_insert_strings = []
     for i in files:   
         column_value_pair = csvreader(i)
-        db_insert_string = get_data(column_value_pair)
-        # print(db_insert_string)
-
-
-main()
-
-
+        db_insert_strings.append(get_data(column_value_pair))
+    return db_insert_strings
