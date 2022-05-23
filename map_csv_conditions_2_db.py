@@ -47,27 +47,28 @@ def get_data(column_value_pair):
     for i in values:            
         if column_value_pair.get(i) != None and column_value_pair.get(i) != "":
             if column_value_pair.get(i).startswith("PGPC"):
-                returnstring += column_value_pair.get(i).split("-")[1] + "," + column_value_pair.get(i) + ","
+                returnstring += f"'{column_value_pair.get(i).split('-')[1]}', '{column_value_pair.get(i)}', "
             else:
-                returnstring += column_value_pair.get(i) + ","
+                returnstring += f"'{column_value_pair.get(i)}', "
         else:
             returnstring += "NULL,"
 
     if column_value_pair.get("Sex") != None:
         if "m" in column_value_pair.get("Sex").lower():
-            gender_concept_id = "8507," + column_value_pair.get("Sex") + ","
+            gender_concept_id = f"8507, '{column_value_pair.get('Sex')}', "
         else: 
-            gender_concept_id = "8532" + column_value_pair.get("Sex") + ","
+            gender_concept_id = f"8532, '{column_value_pair.get('Sex')}', "
         returnstring += gender_concept_id
     else:
         returnstring += ","+"NULL"+","
 
     if column_value_pair.get("Ethnicity") != None and column_value_pair.get("Ethnicity") != "":
         if column_value_pair.get("Ethnicity") == "White":
-            returnstring += 2*("45532670," + column_value_pair.get("Ethnicity") + ",")
+            returnstring += 2*("45532670, '" + column_value_pair.get("Ethnicity") + "',")
             returnstring = returnstring[:-1]
         else:
-            returnstring += 2*("404," + column_value_pair.get("Ethnicity") + ",")
+            returnstring += 2*("404, '" + column_value_pair.get("Ethnicity") + "',")
+            # if 404 ethnicity unknown
             returnstring = returnstring[:-1]
 
     returnstring = "(" + returnstring + ")"
