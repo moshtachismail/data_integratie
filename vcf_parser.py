@@ -34,19 +34,23 @@ def read_file_filter(filter_annotated_variants):
     for person in filter_annotated_variants.split("_"):
         if "PGPC" in person:  # e.g. PGPC-26
             person_id = person.split("-")[1]
-    print(f"workflow: Generating data for measurement, patient {person_id}")
+    # print(f"workflow: Generating data for measurement, patient {person_id}")
     with open(filter_annotated_variants, "r") as f:
         for index, line in enumerate(f):
             line_sp = line.strip().split("\t")
             try:
                 if line.strip().startswith("## Output produced at"):
-                    date = line.strip()
+                    # expected date format 
+                    # ## Output produced at 2022-04-25 09:52:30"
+                    date = line.strip().split(" ")[4]
                 if line_sp[3] != "-":  # 3 is gene, 4 is feature
                     if chosen_variants <= 10:
                         chosen_variants += 1
                         # print(line_sp)
                         if line_sp[3] != "Gene" or line_sp[4] != "Feature":
                             # so the first header is 
+                            # PostgreSQL uses the yyyy-mm-dd
+                            person_id = person_id.replace("0", "")
                             info[index] = f"({uuid.uuid1().int}, {person_id}, '{date}', 4281995, '{line_sp[3]}', 4048365, '{line_sp[4]}', NULL)" 
                         # UUID, person_id, date, measurement_concept_id, gene (measurement_source_value), value_as_concept_id (measurement_id athena) feature, measurement_type_concept_id
             except IndexError:

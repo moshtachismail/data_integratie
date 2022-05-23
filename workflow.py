@@ -2,6 +2,7 @@
 
 import psycopg2
 import vcf_parser
+import csv_reader
 import os
 
 # pip install psycopg2  # don't forget to install
@@ -26,11 +27,12 @@ def get_command(command_base, data):
         person (list): list with all person information
     """
     for index, p in enumerate(data):
+        print(p)
         if index == len(data) -1:
-            command_base = command_base + p + ";"
+            command_base = command_base + str(p) + ";"
             break
         else:
-            command_base = command_base + p + ", "
+            command_base = command_base + str(p) + ", "
     return command_base
 
 
@@ -87,6 +89,9 @@ def main():
         "source_value, value_as_concept_id, value_source_value, measurement_"\
         "type_concept_id) VALUES "
 
+    command_c = "INSERT INTO onderwijs.di_groep_6.condition_occurrence(condit"\
+    "ion_occurrence_id, person_id, condition_concept_id, condition_source_v"\
+    "alue, condition_start_date, condition_type_concept_id) VALUES "
     # cursor.execute(command_m)
     # Fetch a single row using fetchone() method.
     # data = cursor.fetchone()
@@ -98,25 +103,44 @@ def main():
     # new order needs to be changed to the correct steps
     all_vcf = [["/Users/lean/data_integratie/PGPC_0003_S1.flt.vcf", 
     "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0003.vcf", 
-    "/Users/lean/data_integratie/filter_chr21_PGPC-0003_filter21_vep_0003.vcf"], 
+    "/Users/lean/data_integratie/filter_chr21_PGPC-0003_filter21_vep_0003.vcf",
+    "/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-3.csv"], 
     ["/Users/lean/data_integratie/PGPC_0026_S1.flt.vcf",
     "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0026.vcf", 
-    "/Users/lean/data_integratie/filter_chr21_PGPC-0026_filter21_vep_0026.vcf"]]
+    "/Users/lean/data_integratie/filter_chr21_PGPC-0026_filter21_vep_0026.vcf",
+    "/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-26.csv"]]
+
 
     write_filter_vcf_to_annotate(all_vcf)
 
     # annotate vcf files and set command for measurement table
-    for vcf in all_vcf:
+    measurements_all_vcf = {}
+    conditions_all_csv = {}
+    for index, vcf in enumerate(all_vcf):
         annotate_using_vep(vcf[1], vcf[2])
 
         # get genes 10 from the annotated vcf file into the
         # measuremnt table in the database
-        measurements = vcf_parser.read_file_filter(vcf[2])
-        command_m = get_command(command_m, measurements.values())
-    print(command_m)
+        # measurements = vcf_parser.read_file_filter(vcf[2])
+        # measurements_all_vcf.append(vcf_parser.read_file_filter(vcf[2]).values())
+        # try:
+        measurements_all_vcf |= vcf_parser.read_file_filter(vcf[2])
+        con = csv_reader.read_csv(vcf[3])
+        if con is None:
+            print(f"No Symptoms or Condintions for {vcf[3]}")
+        else:
+            # conditions_all_csv.append(csv_reader.read_csv(vcf[3].values()))
+            conditions_all_csv |= con
+
+    command_m = get_command(command_m, measurements_all_vcf.values())
+    command_c = get_command(command_c, conditions_all_csv.values())
+    # print(command_m)
+    print(command_c)
     # for file in filter_annotated_vcf:
     #     measurements = vcf_parser.read_file_filter(file)
     #     command_m = get_command(command_m, measurements.values())
     #     print(command_m, "test")
+
+    
     
 main()
