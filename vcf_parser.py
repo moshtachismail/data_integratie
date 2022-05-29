@@ -1,5 +1,7 @@
 # Lean
 import uuid
+
+
 def read_file(file):
     """Read lines VCF from a VCF file.
     Args:
@@ -51,7 +53,7 @@ def read_file_filter(filter_annotated_variants):
                             # so the first header is 
                             # PostgreSQL uses the yyyy-mm-dd
                             person_id = person_id.replace("0", "")
-                            info[index] = f"({uuid.uuid1().int}, {person_id}, '{date}', 4281995, '{line_sp[3]}', 4048365, '{line_sp[4]}', NULL)" 
+                            info[index] = f"({int(str(uuid.uuid1().int)[-9:])}, {person_id}, '{date}', 4281995, '{line_sp[3]}', 4048365, '{line_sp[4]}', NULL)" 
                         # UUID, person_id, date, measurement_concept_id, gene (measurement_source_value), value_as_concept_id (measurement_id athena) feature, measurement_type_concept_id
             except IndexError:
                 pass

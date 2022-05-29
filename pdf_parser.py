@@ -53,11 +53,11 @@ def read_pdf(file):
         exit(1)
 
                         
-def main():
-    files = ["PGPC-3.pdf", "PGPC-25.pdf", "PGPC-26.pdf"]
-    # files = ["data_integratie/PGPC-3.pdf", "data_integratie/PGPC-25.pdf", "PGPC-26.pdf"]
-    for file in files:
-        read_pdf(file)
+# def main():
+#     files = ["PGPC-3.pdf", "PGPC-25.pdf", "PGPC-26.pdf"]
+#     # files = ["data_integratie/PGPC-3.pdf", "data_integratie/PGPC-25.pdf", "PGPC-26.pdf"]
+#     for file in files:
+#         read_pdf(file)
 
 
-main()
+# main()
