@@ -2,23 +2,26 @@ def csvreader(file_iter):
     """
     Function reads PGPC csv files, returns dict with 
     column name key & column value.
-    Input: File location string
-    Returns: Dict column name - column value pairs
+    PARAM: Str 'File location'
+    RETURN: Dict column name - column value pairs
     """
     vallist = []
     with open(file_iter, "r") as file_iter:
         for i, line in enumerate(file_iter):
             line = line.replace('\n', '')
 
+            # First two lines of file
             if i == 0:
                 columns = line.split(',')
-
             elif i == 1:
                 values = line.split(',')
 
+            # If the line does not start with PGPC, it's a value 
+            # and gets added to 'columns' var
             elif not line.startswith("PGPC"):
                 columns.extend(line.split(',')[1:])
                 if vallist:
+                    # List comprehension line
                     vallist = [i for i in vallist if i]
                     values.extend(vallist)
                     vallist = []
@@ -43,7 +46,7 @@ def get_data(column_value_pair):
     values = ["Participant", "Birth year", "Birth month"]
     returnstring = ""
 
-    # For loop to get the first 3 standard values, rest is special
+    # For loop to get the first 3 values; they don't need special handling
     for i in values:            
         if column_value_pair.get(i) != None and column_value_pair.get(i) != "":
             if column_value_pair.get(i).startswith("PGPC"):
@@ -53,6 +56,7 @@ def get_data(column_value_pair):
         else:
             returnstring += "NULL,"
 
+    # Determine 'sex'; if not M it's F. If empty, add NULL
     if column_value_pair.get("Sex") != None:
         if "m" in column_value_pair.get("Sex").lower():
             gender_concept_id = f"8507, '{column_value_pair.get('Sex')}', "
@@ -62,6 +66,8 @@ def get_data(column_value_pair):
     else:
         returnstring += ","+"NULL"+","
 
+    # Determine the ethnicity. Return Athena ethnicity code for white
+    # and if the colour isn't white, add 404 ethnicity unknown
     if column_value_pair.get("Ethnicity") != None and column_value_pair.get("Ethnicity") != "":
         if column_value_pair.get("Ethnicity") == "White":
             returnstring += 2*("45532670, '" + column_value_pair.get("Ethnicity") + "',")
