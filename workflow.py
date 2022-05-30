@@ -2,11 +2,13 @@
 
 from sqlite3 import IntegrityError
 import psycopg2
+import os
+# custom imports
 import vcf_parser
 import csv_reader
 import map_csv_conditions_2_db as person_table
 import pdf_parser
-import os
+import metadata
 
 # pip install psycopg2  # don't forget to install
 
@@ -211,7 +213,7 @@ def main():
                 "/Users/lean/data_integratie/filter_chr21_PGPC-0026_filter21_vep_0026.vcf",
                 "/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-26.csv"],
                ["/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-25.csv"]]
-
+    # change
     measurements_all_vcf, conditions_all_csv, person_all = \
         set_db_data_commands(all_vcf)
 
