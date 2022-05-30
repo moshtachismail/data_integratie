@@ -8,16 +8,12 @@ def csvreader(file):
     with open(file, "r") as file:
         for i, line in enumerate(file):
             line = line.replace('\n', '')
-
             if i == 0:
                 columns = line.split(',')
-
             elif i == 1:
                 values = line.split(',')
-
             elif not line.startswith("PGPC"):
                 columns.extend(line.split(',')[1:])
-
             else: 
                 values.extend(line.split(',')[1:])
         column_value_pair = dict(zip(columns, values))

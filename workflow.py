@@ -27,7 +27,7 @@ def connection(user, password):
 
 def get_command(command_base, data):
     """_summary_
-    Creattes a command to insert into a postgres database
+    Creates a command to insert into a postgres database
     Args:
         person (list): list with all person information
     """
@@ -60,11 +60,19 @@ def annotate_using_vep(filter_vcf, annotated_vcf):
     Args:
         filter_vcf (path): path to filterd VCF file
     """
-    os.system("docker run -i -t -v $HOME/vep_data:/opt/vep/.vep -v "
-        "{filter_vcf}:/opt/vep/.vep/{annotated_vcf} ensemblorg/ensembl-vep")
+    os.system(f"docker run -i -t -v $HOME/vep_data:/opt/vep/.vep -v {filter_vcf}:/opt/vep/.vep/{annotated_vcf} ensemblorg/ensembl-vep")
 
 
 def csv_files(file, conditions_all_csv, person_all):
+    """Reads CSV to check for conditions or symptoms
+    Args:
+        file (path): path to CSV file
+        conditions_all_csv (_type_): _description_
+        person_all (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     con = csv_reader.read_csv(file)
     if con is None:
         print(f"No Symptoms or Condintions for {file}")
@@ -73,7 +81,6 @@ def csv_files(file, conditions_all_csv, person_all):
         conditions_all_csv |= con
     person_all.append(person_table.person_all([file])[0])
     return conditions_all_csv, person_all
-
     # example and therefore it does not apply to PEP8
     # INSERT INTO onderwijs.di_groep_6.person(person_id, person_source_value, year_of_birth, month_of_birth, gender_concept_id, gender_source_value, race_concept_id, race_source_value, ethnicity_concept_id, ethnicity_source_value) VALUES (3,'PGPC-3',1959, 'NULL',8507,'M',45532670,'White',45532670,'White'),(25,'PGPC-25',1944,12,8507,'M',45532670,'White',45532670,'White'),(26,'PGPC-26',1933,8,8507,'M',45532670,'White',45532670,'White');(26,'PGPC-26',1933,8,8507,'M',45532670,'White',45532670,'White'),
 
@@ -136,7 +143,9 @@ def main():
     "oeksproject/Data_integratie/data_integratie_git/data_integratie/"
     "PGPC-26.pdf"]
 
-    pdf_to_csv(list_csv_files)
+    # function loops over the list by itself.
+    # pdf_to_csv(list_csv_files)
+
     # new order needs to be changed to the correct steps
     all_vcf = [["/Users/lean/data_integratie/PGPC_0003_S1.flt.vcf",
                 "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0003.vcf",
@@ -167,13 +176,16 @@ def main():
         else:
             conditions_all_csv, person_all = csv_files(
                 vcf[0], conditions_all_csv, person_all)
-    print(person_all)
+    # print(person_all)
 
     command_m = get_command(command_m, measurements_all_vcf.values())
     command_c = get_command(command_c, conditions_all_csv.values())
     command_p = get_command(command_p, person_all)
+    print("=-=-=-=-=")
     print(command_m)
+    print("=-=-=-=-=")
     print(command_c)
+    print("=-=-=-=-=")
     print(command_p)
 
 
