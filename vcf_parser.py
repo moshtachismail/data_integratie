@@ -1,7 +1,6 @@
 # Lean
 import uuid
 
-
 def read_file(file):
     """Read lines VCF from a VCF file.
     Args:
@@ -31,12 +30,14 @@ def read_file_filter(filter_annotated_variants):
     """
     info = {}
     chosen_variants = 0
-
     # get person id from the VCF file name.
     for person in filter_annotated_variants.split("_"):
         if "PGPC" in person:  # e.g. PGPC-26
             person_id = person.split("-")[1]
-    # print(f"workflow: Generating data for measurement, patient {person_id}")
+    try:
+        print(f"workflow: Generating data for measurement, patient {person_id}")
+    except NameError:
+        print("workflow: Something went wrong with person_id for the person.")
     with open(filter_annotated_variants, "r") as f:
         for index, line in enumerate(f):
             line_sp = line.strip().split("\t")
@@ -52,8 +53,9 @@ def read_file_filter(filter_annotated_variants):
                         if line_sp[3] != "Gene" or line_sp[4] != "Feature":
                             # so the first header is 
                             # PostgreSQL uses the yyyy-mm-dd
+                            # measurement_type_concept_id: 5001 for all
                             person_id = person_id.replace("0", "")
-                            info[index] = f"({int(str(uuid.uuid1().int)[-9:])}, {person_id}, '{date}', 4281995, '{line_sp[3]}', 4048365, '{line_sp[4]}', 'NULL')" 
+                            info[index] = f"({int(str(uuid.uuid1().int)[-9:])}, {person_id}, '{date}', 4281995, '{line_sp[3]}', 4048365, '{line_sp[4]}', 5001)" 
                             # print(info[index], "test")
                         # UUID, person_id, date, measurement_concept_id, gene (measurement_source_value), value_as_concept_id (measurement_id athena) feature, measurement_type_concept_id
             except IndexError:
@@ -72,16 +74,3 @@ def write_file(file, info):
         for line_info in info.values():
             f.write(f"{str(line_info)}")
     print(f"workflow: {file} contains {len(info.values())} variants.")
-
-# chr, positie, id (welk id? ref, alt, INFO(Medgen, clnsig))
-                
-
-# def main():
-    # vcf = "/Users/lean/PGPC_0026_S1.flt.vcf"
-    # # info = read_file(vcf) # info is dict with variants that contains missense_variant
-    # vcfs = ["/Users/lean/data_integratie/Filtered_chr21_PGPC-3_annotated.vcf", "/Users/lean/data_integratie/Filtered_chr21_PGPC-26_annotated.vcf"]
-    # for vcf in vcfs:
-    #     info = read_file_filter(vcf)
-    # write_file("filter_chr21_PGPC_0026.vcf", info)
-
-# main()

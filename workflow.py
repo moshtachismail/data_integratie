@@ -1,5 +1,6 @@
 # laad de elementen in de database week 3/4
 
+from sqlite3 import IntegrityError
 import psycopg2
 import vcf_parser
 import csv_reader
@@ -20,9 +21,9 @@ def connection(user, password):
     Returns:
         _type_: _description_
     """
-    return psycopg2.connect(database="onderwijs", user=user, 
-        password=password, host="postgres.biocentre.nl",
-        options="-c search_path=di_groep_6")
+    return psycopg2.connect(database="onderwijs", user=user,
+                            password=password, host="postgres.biocentre.nl",
+                            options="-c search_path=di_groep_6")
 
 
 def get_command(command_base, data):
@@ -60,7 +61,13 @@ def annotate_using_vep(filter_vcf, annotated_vcf):
     Args:
         filter_vcf (path): path to filterd VCF file
     """
-    os.system(f"docker run -i -t -v $HOME/vep_data:/opt/vep/.vep -v {filter_vcf}:/opt/vep/.vep/{annotated_vcf} ensemblorg/ensembl-vep")
+    os.system(
+        f"docker run -i -t -v $HOME/vep_data:/opt/vep/.vep -v {filter_vcf}:/opt/vep/.vep/{annotated_vcf} ensemblorg/ensembl-vep")
+    if os.stat(annotated_vcf).st_size > 0:
+        print("workflow: Docker VEP file contains information, "
+            "workflow continues...")
+    else:
+        print("workflow: Docker Failed VEP file doesn't cotain data")
 
 
 def csv_files(file, conditions_all_csv, person_all):
@@ -96,28 +103,76 @@ def pdf_to_csv(files):
         pdf_parser.read_pdf(file)
 
 
+def set_db_data_commands(all_vcf):
+    """Get all the data for all the tables (person, measurement, 
+    condition_occurrence) to later create a single command to insert
+    into the database.
+    Args:
+        all_vcf (list): list containing all the data for all the files
+        [[file_1.flt.vcf, filter_chr21_PGPC_filter21_0001.vcf, 
+        filter_chr21_PGPC-0001_filter21_vep_0001.vcf, PGPC-1.csv], 
+        [file_2.flt.vcf, filter_chr21_PGPC_filter21_0002.vcf, 
+        filter_chr21_PGPC-0002_filter21_vep_0002.vcf, PGPC-2.csv]]
+    Returns:
+        return measurement, conditions, person: all the data
+    """
+    try:
+        write_filter_vcf_to_annotate(all_vcf[:2])
+    except IndexError:
+        print("workflow: There is something wrong with lists of all file, "
+              "check all_vcf")
+    # annotate vcf files and set command for measurement table
+    measurements_all_vcf = {}
+    conditions_all_csv = {}
+    person_all = []
+    try:
+        for index, vcf in enumerate(all_vcf):
+            if index != 2:  # no vcf reading
+                annotate_using_vep(vcf[1], vcf[2])
+                measurements_all_vcf |= vcf_parser.read_file_filter(vcf[2])
+                conditions_all_csv, person_all = csv_files(
+                    vcf[3], conditions_all_csv, person_all)
+            else:
+                conditions_all_csv, person_all = csv_files(
+                    vcf[0], conditions_all_csv, person_all)
+        return measurements_all_vcf, conditions_all_csv, person_all
+    except FileNotFoundError:
+        print(f"workflow: Something went wrong with the files, "
+            "please read the manual for the rigth configuration.")
+
+
+def cursor_execute_db(cursor, command):
+    print(f"workflow: Inserting the following into the database {command}")
+    cursor.execute(command)
+
+
+def close_con_cursor(cursor, conn, error):
+    """Close the connection to the database
+    Args:
+        cursor (cursor): cursor from the database
+        conn (connection): connection to the database
+    """
+    if conn:
+        conn.close()
+        cursor.close()
+    if error:
+        print("workflow: Closed connection to database.")
+    else:
+        print("workflow: Completed successfully and inserted into "
+            "the database")
+
+
 def main():
-    filter_annotated_vcf = ["/Users/lean/data_integratie/Filtered_chr21_"
-                            "PGPC-3_annotated.vcf", "/Users/lean/data_integratie/Filtered_chr21_"
-                            "PGPC-26_annotated.vcf"]
-
     # connection failed:
-    # conn = connection("DI_groep_6", "blaat1234")
-    # cursor = conn.cursor()
+    conn = connection("DI_groep_6", "blaat1234")
+    cursor = conn.cursor()
+    print("workflow: Created cursor.")
 
-    # cursor.execute("select version()")
-    # "INSERT INTO onderwijs.di_groep_6.person(person_id, person_source_value, year_of_birth, month_of_birth, gender_concept_id, gender_source_value, race_concept_id, race_source_value, ethnicity_concept_id, ethnicity_source_value) VALUES (3,'PGPC-3',1959, 'NULL',8507,'M',45532670,'White',45532670,'White'),(25,'PGPC-25',1944,12,8507,'M',45532670,'White',45532670,'White'),(26,'PGPC-26',1933,8,8507,'M',45532670,'White',45532670,'White');(26,'PGPC-26',1933,8,8507,'M',45532670,'White',45532670,'White'),"
+    # the standard insert commands are hardcoded
     command_p = "INSERT INTO onderwijs.di_groep_6.person(person_id, "\
         "person_source_value, year_of_birth, month_of_birth, gender_concept_id, "\
         "gender_source_value, race_concept_id, race_source_value, "\
         "ethnicity_concept_id, ethnicity_source_value) VALUES "
-    person = ["(3,'PGPC-3',1959, NULL,8507,'M',45532670,'White',45532670,'White')",
-              "(25,'PGPC-25',1944,12,8507,'M',45532670,'White',45532670,'White')", "(26,'PGPC-26',1933,8,8507,'M',45532670,'White',45532670,'White')"]
-    # command_p = get_command(command_p, person) # set the person table correct
-    # cursor.execute(command)
-
-    # measurements = vcf_parser.read_file_filter(filter_annotated_vcf)
-    # print(measurements)
     command_m = "INSERT INTO onderwijs.di_groep_6.measurement(measurement_id,"\
         " person_id, measurement_date, measurement_concept_id, measurement_"\
         "source_value, value_as_concept_id, value_source_value, measurement_"\
@@ -134,17 +189,17 @@ def main():
     # conn.close()
 
     list_csv_files = ["/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/Scho"
-    "ol/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_in"
-    "tegratie/data_integratie_git/data_integratie/PGPC-3.pdf", "/Users/lean/"
-    "Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/"
-    "BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_g"
-    "it/data_integratie/PGPC-25.pdf", "/Users/lean/Library/CloudStorage/OneDr"
-    "ive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderz"
-    "oeksproject/Data_integratie/data_integratie_git/data_integratie/"
-    "PGPC-26.pdf"]
+                      "ol/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_in"
+                      "tegratie/data_integratie_git/data_integratie/PGPC-3.pdf", "/Users/lean/"
+                      "Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/"
+                      "BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_g"
+                      "it/data_integratie/PGPC-25.pdf", "/Users/lean/Library/CloudStorage/OneDr"
+                      "ive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderz"
+                      "oeksproject/Data_integratie/data_integratie_git/data_integratie/"
+                      "PGPC-26.pdf"]
 
     # function loops over the list by itself.
-    # pdf_to_csv(list_csv_files)
+    pdf_to_csv(list_csv_files)
 
     # new order needs to be changed to the correct steps
     all_vcf = [["/Users/lean/data_integratie/PGPC_0003_S1.flt.vcf",
@@ -155,38 +210,23 @@ def main():
                 "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0026.vcf",
                 "/Users/lean/data_integratie/filter_chr21_PGPC-0026_filter21_vep_0026.vcf",
                 "/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-26.csv"],
-               ["/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-3.csv"]]
+               ["/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-25.csv"]]
 
-    # the thirt list doesn't have the vcf file wrong format
+    measurements_all_vcf, conditions_all_csv, person_all = \
+        set_db_data_commands(all_vcf)
+
     try:
-        write_filter_vcf_to_annotate(all_vcf[:2])
-    except IndexError:
-        print("workflow: There is something wrong with lists of all file, "
-              "check all_vcf")
-    # annotate vcf files and set command for measurement table
-    measurements_all_vcf = {}
-    conditions_all_csv = {}
-    person_all = []
-    for index, vcf in enumerate(all_vcf):
-        if index != 2:  # no vcf reading
-            annotate_using_vep(vcf[1], vcf[2])
-            measurements_all_vcf |= vcf_parser.read_file_filter(vcf[2])
-            conditions_all_csv, person_all = csv_files(
-                vcf[3], conditions_all_csv, person_all)
-        else:
-            conditions_all_csv, person_all = csv_files(
-                vcf[0], conditions_all_csv, person_all)
-    # print(person_all)
-
-    command_m = get_command(command_m, measurements_all_vcf.values())
-    command_c = get_command(command_c, conditions_all_csv.values())
-    command_p = get_command(command_p, person_all)
-    print("=-=-=-=-=")
-    print(command_m)
-    print("=-=-=-=-=")
-    print(command_c)
-    print("=-=-=-=-=")
-    print(command_p)
-
+        cursor_execute_db(cursor, get_command(
+            command_m, measurements_all_vcf.values()))
+        cursor_execute_db(cursor, get_command(
+            command_c, conditions_all_csv.values()))
+        cursor_execute_db(cursor, get_command(command_p, person_all))
+    except (Exception, psycopg2.Error) as e:
+        print("workflow: Something went wrong inserting into the database, "
+              f"is the data already inserted in the database? ({e}).")
+        close_con_cursor(cursor, conn, True)
+        exit(1)
+    conn.commit()
+    close_con_cursor(cursor, conn, False)
 
 main()

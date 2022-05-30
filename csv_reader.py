@@ -48,7 +48,6 @@ def set_conditions(conditions):
     i = 0
     for patient, condition in conditions.items():
         cc = {}
-        print(patient, condition, "ttest")
         for con in condition:
             c[patient] = []
             # its not clean to set the concept_id hardcoded here, but
