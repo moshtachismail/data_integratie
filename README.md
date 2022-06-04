@@ -12,7 +12,7 @@ To use ensembl VEP it needs to be installed via docker. The following link will 
 
 Please make sure that while running the workflow that you're connected with the EDUROAM network, currently the postgres database isn't available outside the network.
 
-## Run the workflow
+## Run the workflow:
 The following variables will need to be changed to the files from the user. Make sure that in all variables the different patients are in the same order.
 - pdf_to_csv([../data_integratie/example_data/PGPC-1.pdf]) contains a list of the path pdf files it's converting to a CSV file
     - with the following output as name: PGPC-1.csv, so the path in all_vcf becomes for the .csv: "../data_integratie/example_data/PGPC-1.csv"
