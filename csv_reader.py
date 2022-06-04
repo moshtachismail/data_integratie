@@ -1,5 +1,7 @@
 # Lean
 import uuid
+
+
 def read_csv_filter(file, data):
     """gets the condition occurences from a patient
     Args:
@@ -12,20 +14,18 @@ def read_csv_filter(file, data):
     for index, data_l in enumerate(data):
         for d in data_l[0].split(","):
             # if d == "Blood type":  # is only present in blood type
-                # ff.write(f"{data_l[0]}\n{data[index + 1][0]}\n")
+            # ff.write(f"{data_l[0]}\n{data[index + 1][0]}\n")
             if d == "Conditions or Symptom":
-                conditions[file[:-4].split('/')[-1].split('_')[0].split("-")[1]] = []
+                conditions[file[:-4].split('/')
+                           [-1].split('_')[0].split("-")[1]] = []
                 # expected file format
-                # /Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/
-                # School/Han - Bio informatica/BI10 Data Science en 
-                # onderzoeksproject/Data_integratie/data_integratie_git
-                # /data_integratie/PGPC-26.csv
+                # PGPC-26.csv
                 for i in range(len(data)):
                     try:
                         if data[index + i + 1][0].\
-                        startswith(f"{file[:-4].split('/')[-1].split('_')[0]}"): # indicates a row
-                            # ff.write(f"{data[index + i + 1][0]}\n")
-                            conditions[file[:-4].split('/')[-1].split('_')[0].split("-")[1]].append(data[index + i + 1][0].split(",")[1])
+                                startswith(f"{file[:-4].split('/')[-1].split('_')[0]}"):  # indicates a row
+                            conditions[file[:-4].split('/')[-1].split('_')[0].split(
+                                "-")[1]].append(data[index + i + 1][0].split(",")[1])
                         else:
                             break
                     except IndexError:
@@ -51,25 +51,29 @@ def set_conditions(conditions):
         for con in condition:
             c[patient] = []
             # its not clean to set the concept_id hardcoded here, but
-            # we need a workflow, cleaner to get it by an api 
+            # we need a workflow, cleaner to get it by an api
             if con == "Bilateral retinal detachments and cataracts":
                 # condition startdate is not available in our patients
                 # condition_type_concept_id = 2022-05-30 (yyyy-MM-dd)
-                cc[i] = f"({int(str(uuid.uuid1().int)[-9:])}, {patient}, 4147507, '{con}', '2022-05-30', 32020)"
-                i +=1
-                # (condition_occurrence_id, person_id, condition_concept_id, condition_source_value, condition_start_date, condition_type_concept_id)
+                cc[i] = f"({int(str(uuid.uuid1().int)[-9:])}, {patient}, \
+                    '4147507, '{con}', '2022-05-30', 32020)"
+                i += 1
+                # e.g. 
+                # (condition_occurrence_id, person_id, condition_concept_id, 
+                # condition_source_value, condition_start_date, 
+                # condition_type_concept_id)
             if con == "Osteoarthritis":
                 # con is the condition_occurrence of the patient
-                cc[i] = f"({int(str(uuid.uuid1().int)[-9:])}, {patient}, 40320318, '{con}', '2022-05-30', 32020)"
-                i+=1
+                cc[i] = f"({int(str(uuid.uuid1().int)[-9:])}, {patient}, \
+                    40320318, '{con}', '2022-05-30', 32020)"
+                i += 1
         return cc
-
 
 
 def read_csv(file):
     """Read a PDF file and write the results to a csv file in list
     Args:
-        file (_type_): _description_
+        file (path): str path to csv file
     """
     data = []
     # write temp file to csv, can be removed.
@@ -77,7 +81,6 @@ def read_csv(file):
         with open(file, "r") as f:
             for linef in f:
                 data.append([linef.strip()])
-        
         return set_conditions(read_csv_filter(file, data))
     except FileNotFoundError:
         print(f"workflow: File not found {file}, try another file.")

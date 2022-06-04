@@ -1,11 +1,15 @@
 # data_integratie
-This is a workflow designed to anotate VCF files from data from patient (), and the health data from the patient pdf files are mapped to a OMOP common data model with the concepts using the OMOP vocabulary (Athena.org) .  
+This is a workflow designed to anotate VCF files from data from patient (), and the health data from the patient pdf files are mapped to a OMOP common data model with the concepts using the OMOP vocabulary (Athena.org).  
 
 ## Installation:
 The workflow runs in a conda (miniconda) environment, and can be installed by the following command:
 - conda env create -n data_integratie --file data_integratie.yaml
 
 This will install the correct version of psycopg2 for the connection with the database. And the right dependencies will be installed for tabula to convert the pdf into csv files.
+
+To use ensembl VEP it needs to be installed via docker. The following link will show how to correctly configure docker for ensembl VEP.
+- https://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker
+
 
 ## Run the workflow
 The following variables will need to be changed to the files from the user.
