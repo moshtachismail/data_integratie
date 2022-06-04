@@ -1,7 +1,7 @@
-date_lastrun,2022-06-04-18-30-00
+date_lastrun,2022-06-04-18-34-18
 data_source,/Users/lean/data_integratie/PGPC_0003_S1.flt.vcf, /Users/lean/data_integratie/filter_chr21_PGPC_filter21_0003.vcf, /Users/lean/data_integratie/filter_chr21_PGPC-0003_filter21_vep_0003.vcf, ../data_integratie/example_data/PGPC-3.csv, /Users/lean/data_integratie/PGPC_0026_S1.flt.vcf, /Users/lean/data_integratie/filter_chr21_PGPC_filter21_0026.vcf, /Users/lean/data_integratie/filter_chr21_PGPC-0026_filter21_vep_0026.vcf, ../data_integratie/example_data/PGPC-26.csv, ../data_integratie/example_data/PGPC-25.csv
 workflow_creators,D.Hildebrand,L.Schoonveld,M.Ismail
 workflow_version, workflow v1.0.1
 database_type,Postgres
 database_version,PostgreSQL 14.3 on x86_64-pc-linux-gnu, compiled by gcc (Debian 8.3.0-6) 8.3.0, 64-bit
-database_last_attempt_update,2022-06-04-18-30-00
+database_last_attempt_update,2022-06-04-18-34-18

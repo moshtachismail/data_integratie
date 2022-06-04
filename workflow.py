@@ -187,13 +187,13 @@ def close_con_cursor(cursor, conn, error):
 def main():
     # connection failed:  # comment to exit(1) to test script if 
     # the db is down/ unavailable
-    try:
-        conn = connection("DI_groep_6", "blaat1234")
-        cursor = conn.cursor()
-        print("workflow: Created cursor.")
-    except psycopg2.OperationalError:
-        print("workflow: Database connection failed, stopping workflow.")
-        exit(1)
+    # try:
+    #     conn = connection("DI_groep_6", "blaat1234")
+    #     cursor = conn.cursor()
+    #     print("workflow: Created cursor.")
+    # except psycopg2.OperationalError:
+    #     print("workflow: Database connection failed, stopping workflow.")
+    #     exit(1)
     # # stop comment
 
     # the standard insert commands are hardcoded
@@ -243,21 +243,21 @@ def main():
 
     # # comment to close_con_cursor(cursor, conn, False) to use script
     # # if the db is down/ unavailable
-    try:
-        cursor_execute_db(cursor, get_command(
-            command_m, measurements_all_vcf.values()))
-        cursor_execute_db(cursor, get_command(
-            command_c, conditions_all_csv.values()))
-        cursor_execute_db(cursor, get_command(command_p, person_all))
-    except (Exception, psycopg2.Error) as e:
-        print("workflow: Something went wrong inserting into the database, "
-              f"is the data already inserted in the database? ({e}).")
-        close_con_cursor(cursor, conn, True)
-        exit(1)
-    conn.commit()
+    # try:
+    #     cursor_execute_db(cursor, get_command(
+    #         command_m, measurements_all_vcf.values()))
+    #     cursor_execute_db(cursor, get_command(
+    #         command_c, conditions_all_csv.values()))
+    #     cursor_execute_db(cursor, get_command(command_p, person_all))
+    # except (Exception, psycopg2.Error) as e:
+    #     print("workflow: Something went wrong inserting into the database, "
+    #           f"is the data already inserted in the database? ({e}).")
+    #     close_con_cursor(cursor, conn, True)
+    #     exit(1)
+    # conn.commit()
     # close_con_cursor(cursor, conn, False)
     # # stop comment
-    metadata.create_meta_file("metadata_csv", all_vcf)
+    metadata.create_meta_file("metadata.csv", all_vcf)
 
 
 main()

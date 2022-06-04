@@ -12,6 +12,7 @@ def create_meta_file(file, sources):
     """
     sources = create_one_list_sourcefiles(sources)
     datenow = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    print("test")
     with open(file, "w") as fp:
         # remove existing content
         fp.seek(0)
