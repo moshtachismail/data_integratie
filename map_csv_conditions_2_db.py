@@ -7,7 +7,6 @@ def csvreader(file_iter):
         dict: column name - column value pairs
     """
     vallist = []
-    print(file_iter, "file_iter: ")
     with open(file_iter, "r") as file_iter:
         for i, line in enumerate(file_iter):
             line = line.replace('\n', '')

@@ -37,6 +37,7 @@ def get_command(command_base, data):
             break
         else:
             command_base = command_base + str(p) + ", "
+    # print(command_base)  # check command_base
     return command_base
 
 
@@ -52,13 +53,22 @@ def write_filter_vcf_to_annotate(s_vcf):
         except FileNotFoundError as e:
             print(f"workflow: File not found try changing the path {e}")
 
+    """annotates the filterd VCF files using VEP (docker is required).
+    Install VEP using the following installation guide:
+    https://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker
+    Args:
+        filter_vcf (path): path to filterd VCF file
+    """
+
 
 def annotate_using_vep(filter_vcf, annotated_vcf):
     """annotates the filterd VCF files using VEP (docker is required).
     Install VEP using the following installation guide:
     https://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker
     Args:
-        filter_vcf (path): path to filterd VCF file
+        filter_vcf (path): filtered VCF file (chr21) to annotate
+        annotated_vcf (path): file name of annotated VCF file (chr21), 
+        is going to be created using ensembl VEP.
     """
     os.system(
         f"docker run -i -t -v $HOME/vep_data:/opt/vep/.vep -v {filter_vcf}"
@@ -68,6 +78,7 @@ def annotate_using_vep(filter_vcf, annotated_vcf):
               "workflow continues...")
     else:
         print("workflow: Docker Failed VEP file doesn't cotain data")
+        exit(1)
 
 
 def csv_files(file, conditions_all_csv, person_all):
@@ -89,8 +100,8 @@ def csv_files(file, conditions_all_csv, person_all):
     return conditions_all_csv, person_all
     # example: database insert into person
     # INSERT INTO onderwijs.di_groep_6.person(person_id, person_source_value,
-    #  year_of_birth, month_of_birth, gender_concept_id, gender_source_value, 
-    # race_concept_id, race_source_value, ethnicity_concept_id, 
+    #  year_of_birth, month_of_birth, gender_concept_id, gender_source_value,
+    # race_concept_id, race_source_value, ethnicity_concept_id,
     # ethnicity_source_value) VALUES (3,'PGPC-3',1959, 'NULL',8507,'M',
     # 45532670,'White',45532670,'White'),(25,'PGPC-25',1944,12,8507,'M',
     # 45532670,'White',45532670,'White'),(26,'PGPC-26',1933,8,8507,'M',
@@ -174,14 +185,16 @@ def close_con_cursor(cursor, conn, error):
 
 
 def main():
-    # connection failed:
-    # try:
-    #     conn = connection("DI_groep_6", "blaat1234")
-    #     cursor = conn.cursor()
-    #     print("workflow: Created cursor.")
-    # except psycopg2.OperationalError:
-    #     print("workflow: Database connection failed, stopping workflow.")
-    #     exit(1)
+    # connection failed:  # comment to exit(1) to test script if 
+    # the db is down/ unavailable
+    try:
+        conn = connection("DI_groep_6", "blaat1234")
+        cursor = conn.cursor()
+        print("workflow: Created cursor.")
+    except psycopg2.OperationalError:
+        print("workflow: Database connection failed, stopping workflow.")
+        exit(1)
+    # # stop comment
 
     # the standard insert commands are hardcoded
     command_p = "INSERT INTO onderwijs.di_groep_6.person(person_id, "\
@@ -196,56 +209,54 @@ def main():
     command_c = "INSERT INTO onderwijs.di_groep_6.condition_occurrence(condit"\
         "ion_occurrence_id, person_id, condition_concept_id, condition_source_v"\
         "alue, condition_start_date, condition_type_concept_id) VALUES "
-    # cursor.execute(command_m)
-    # Fetch a single row using fetchone() method.
-    # data = cursor.fetchone()
-    # print("Connection established to: ",data)
-    # conn.commit()
-    # conn.close()
 
-    list_csv_files = ["/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk"
-                      "/School/Han - Bio informatica/BI10 Data Science en "
-                      "onderzoeksproject/Data_integratie/data_integratie_"
-                      "git/data_integratie/PGPC-3.pdf", "/Users/lean/"
-                      "Library/CloudStorage/OneDrive-Persoonlijk/School/Han"
-                      " - Bio informatica/BI10 Data Science en onderzoeksp"
-                      "roject/Data_integratie/data_integratie_git/data_in"
-                      "tegratie/PGPC-25.pdf", "/Users/lean/Library/CloudSt"
-                      "orage/OneDrive-Persoonlijk/School/Han - Bio informa"
-                      "tica/BI10 Data Science en onderzoeksproject/Data_in"
-                      "tegratie/data_integratie_git/data_integratie/"
-                      "PGPC-26.pdf"]
+    # CHANGE TO NEW FILE LOCATION
+    # PATH TO PATIENT PDF FILE (PGPC-26)
+    list_csv_files = ["../data_integratie/example_data/PGPC-3.pdf",
+                      "../data_integratie/example_data/PGPC-25.pdf",
+                      "../data_integratie/example_data/PGPC-26.pdf"]
 
     # function loops over the list by itself.
     pdf_to_csv(list_csv_files)
 
+    # CHANGE THE FILE
     # new order needs to be changed to the correct steps
     all_vcf = [["/Users/lean/data_integratie/PGPC_0003_S1.flt.vcf",
-                "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0003.vcf",
-                "/Users/lean/data_integratie/filter_chr21_PGPC-0003_filter21_vep_0003.vcf",
-                "/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-3.csv"],
+                "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0"
+                "003.vcf", "/Users/lean/data_integratie/filter_chr21_PGPC"
+                "-0003_filter21_vep_0003.vcf", 
+                "../data_integratie/example_data/PGPC-3.csv"],
                ["/Users/lean/data_integratie/PGPC_0026_S1.flt.vcf",
-                "/Users/lean/data_integratie/filter_chr21_PGPC_filter21_0026.vcf",
-                "/Users/lean/data_integratie/filter_chr21_PGPC-0026_filter21_vep_0026.vcf",
-                "/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-26.csv"],
-               ["/Users/lean/Library/CloudStorage/OneDrive-Persoonlijk/School/Han - Bio informatica/BI10 Data Science en onderzoeksproject/Data_integratie/data_integratie_git/data_integratie/PGPC-25.csv"]]
+                "/Users/lean/data_integratie/filter_chr21_PGPC_filter21"
+                "_0026.vcf", "/Users/lean/data_integratie/filter_chr21_"
+                "PGPC-0026_filter21_vep_0026.vcf", 
+                "../data_integratie/example_data/PGPC-26.csv"],
+               ["../data_integratie/example_data/PGPC-25.csv"]]
     # change
     measurements_all_vcf, conditions_all_csv, person_all = \
         set_db_data_commands(all_vcf)
 
-    # try:
-    #     cursor_execute_db(cursor, get_command(
-    #         command_m, measurements_all_vcf.values()))
-    #     cursor_execute_db(cursor, get_command(
-    #         command_c, conditions_all_csv.values()))
-    #     cursor_execute_db(cursor, get_command(command_p, person_all))
-    # except (Exception, psycopg2.Error) as e:
-    #     print("workflow: Something went wrong inserting into the database, "
-    #           f"is the data already inserted in the database? ({e}).")
-    #     close_con_cursor(cursor, conn, True)
-    #     exit(1)
-    # conn.commit()
+    # check to see command for db if db is down/ unavailable
+    # get_command(command_m, measurements_all_vcf.values())
+    # get_command(command_c, conditions_all_csv.values())
+    # get_command(command_p, person_all)
+
+    # # comment to close_con_cursor(cursor, conn, False) to use script
+    # # if the db is down/ unavailable
+    try:
+        cursor_execute_db(cursor, get_command(
+            command_m, measurements_all_vcf.values()))
+        cursor_execute_db(cursor, get_command(
+            command_c, conditions_all_csv.values()))
+        cursor_execute_db(cursor, get_command(command_p, person_all))
+    except (Exception, psycopg2.Error) as e:
+        print("workflow: Something went wrong inserting into the database, "
+              f"is the data already inserted in the database? ({e}).")
+        close_con_cursor(cursor, conn, True)
+        exit(1)
+    conn.commit()
     # close_con_cursor(cursor, conn, False)
+    # # stop comment
     metadata.create_meta_file("metadata_csv", all_vcf)
 
 

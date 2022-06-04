@@ -20,7 +20,7 @@ def create_meta_file(file, sources):
         fp.write(f"date_lastrun,{datenow}\n")
         fp.write(f"data_source,{', '.join(sources)}\n")
         fp.write("workflow_creators,D.Hildebrand,L.Schoonveld,M.Ismail\n")
-        fp.write("workflow_version, workflow v1.0.1")
+        fp.write("workflow_version, workflow v1.0.1\n")
         fp.write("database_type,Postgres\n")
         fp.write("database_version,PostgreSQL 14.3 on x86_64-pc-linux-gnu, "
                  "compiled by gcc (Debian 8.3.0-6) 8.3.0, 64-bit\n")
