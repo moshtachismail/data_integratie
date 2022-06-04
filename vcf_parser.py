@@ -1,4 +1,4 @@
-# Lean
+# author: Lean
 import uuid
 
 def read_file(file):
@@ -69,7 +69,6 @@ def write_file(file, info):
         info (dict): dict of information about the VCF file
     """
     # the standard info is written manually to the vcf file
-    # header needs to be add manually
     with open(file, "w") as f:
         for line_info in info.values():
             f.write(f"{str(line_info)}")
