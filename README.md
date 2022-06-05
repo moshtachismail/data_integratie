@@ -9,6 +9,7 @@ This will install the correct version of psycopg2 for the connection with the da
 
 To use ensembl VEP it needs to be installed via docker. The following link will show how to correctly configure docker for ensembl VEP.
 - https://www.ensembl.org/info/docs/tools/vep/script/vep_download.html#docker
+- The output will be placed in the output directory created for the docker vep.
 
 Please make sure that while running the workflow that you're connected with the EDUROAM network, currently the postgres database isn't available outside the network.
 
