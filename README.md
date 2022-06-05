@@ -22,5 +22,5 @@ The following variables will need to be changed to the files from the user. Make
     - **It needs to have this order!** The first three files are required, the last file isn't required and is excepted in the code.
     - The first file needs to be a legit VCF file and the other files are only the names that are going to be used for the workflow.
 
-The PGPC_filtered.sv files are not used, but they can be usefull to quickly see patient important info that gets into the database.
+The PGPC_filtered.csv files are not used, but they can be usefull to quickly see patient important info that gets into the database.
 
